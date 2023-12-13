@@ -1,4 +1,4 @@
-import { IsOptional, IsPositive } from 'class-validator';
+import { IsOptional, IsPositive } from '@nestjs/class-validator';
 
 export class PaginationQueryDto {
   @IsOptional()

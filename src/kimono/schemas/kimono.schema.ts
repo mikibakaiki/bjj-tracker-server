@@ -21,6 +21,9 @@ export class Kimono extends Document {
 
   @Prop([Date])
   timestamp: Date[];
+
+  @Prop()
+  img: string;
 }
 
 export const KimonoSchema = SchemaFactory.createForClass(Kimono);
