@@ -15,7 +15,7 @@ import { MongooseModule } from '@nestjs/mongoose';
         process.env.NODE_ENV === 'production'
           ? '.env.production'
           : '.env.development',
-      ignoreEnvFile: process.env.NODE_ENV === 'production', // Optionally ignore .env file in production
+      // ignoreEnvFile: process.env.NODE_ENV === 'production', // Optionally ignore .env file in production
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
