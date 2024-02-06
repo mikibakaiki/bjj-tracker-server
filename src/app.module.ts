@@ -1,6 +1,4 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Kimono, KimonoSchema } from './kimono/schemas/kimono.schema';
-
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { KimonoModule } from './kimono/kimono.module';
