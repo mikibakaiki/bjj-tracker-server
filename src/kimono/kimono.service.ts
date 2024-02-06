@@ -11,14 +11,20 @@ export class KimonoService {
   ) {}
 
   async findAll(paginationQuery: PaginationQueryDto) {
+    console.log(paginationQuery);
+    const filter = paginationQuery.filter ? { name: { $regex: this.escapeRegExp(paginationQuery.filter), $options: 'i' } } : {};
     const kimonos = await this.kimonoModel
-      .find()
+      .find(filter)
       .skip(paginationQuery.offset)
       .limit(paginationQuery.limit)
       .exec();
-    console.log(kimonos);
+    kimonos.forEach(kimono => console.log(kimono.name));
 
     return kimonos;
+  }
+
+  escapeRegExp(string: string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
   async findOne(id: string) {

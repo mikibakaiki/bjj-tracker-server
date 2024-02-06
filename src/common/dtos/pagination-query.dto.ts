@@ -1,4 +1,4 @@
-import { IsOptional, IsPositive } from '@nestjs/class-validator';
+import { IsOptional, IsPositive, IsString } from '@nestjs/class-validator';
 
 export class PaginationQueryDto {
   @IsOptional()
@@ -8,4 +8,8 @@ export class PaginationQueryDto {
   @IsOptional()
   @IsPositive()
   offset: number;
+
+  @IsOptional()
+  @IsString()
+  filter: string;
 }
