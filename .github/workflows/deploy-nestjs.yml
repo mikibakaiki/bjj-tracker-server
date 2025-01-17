@@ -1,0 +1,50 @@
+name: Deploy NestJS Server
+
+on:
+  workflow_dispatch: # Trigger manually from GitHub Actions
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and push Docker image
+      run: |
+        # Extract short commit hash for versioning
+        COMMIT_HASH=$(git rev-parse --short HEAD)
+
+        # Build and tag the Docker image
+        docker build -t bjj-tracker-server:$COMMIT_HASH .
+        docker tag bjj-tracker-server:$COMMIT_HASH ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/nestjs-server:$COMMIT_HASH
+
+        # Push the image to ECR
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bjj-tracker-server:$COMMIT_HASH
+      env:
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    - name: Render and register ECS task definition
+      run: |
+        # Replace placeholders in the task definition
+        envsubst < aws/nestjs-task.json > aws/nestjs-task-resolved.json
+
+        # Register the task definition
+        aws ecs register-task-definition --cli-input-json file://aws/nestjs-task-resolved.json
+      env:
+        ATLAS_URI: ${{ secrets.ATLAS_URI }}
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        VERSION: $COMMIT_HASH
+
+    - name: Update ECS Service
+      run: |
+        aws ecs update-service \
+          --cluster nestjs-cluster \
+          --service nestjs-service \
+          --force-new-deployment
