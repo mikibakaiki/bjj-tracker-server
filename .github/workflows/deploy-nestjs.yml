@@ -43,7 +43,7 @@ jobs:
         echo "Docker Image: bjj-tracker-server:$IMAGE_TAG"
 
         docker build -t bjj-tracker-server:$IMAGE_TAG .
-        docker tag nestjs-server:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
+        docker tag bjj-tracker-server:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
         docker push $ECR_URI:$IMAGE_TAG
       env:
         AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
