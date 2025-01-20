@@ -70,4 +70,5 @@ jobs:
         aws ecs update-service \
           --cluster bjj-tracker-cluster \
           --service bjj-tracker-server-service \
+          --task-definition nestjs-task \
           --force-new-deployment
