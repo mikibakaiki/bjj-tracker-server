@@ -23,6 +23,7 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v2
       with:
         region: ${{ secrets.AWS_REGION }}
+
     - name: Build and push Docker image
       run: |
         # Extract short commit hash for versioning
@@ -40,6 +41,9 @@ jobs:
 
     - name: Render and register ECS task definition
       run: |
+        # Extract short commit hash for versioning
+        COMMIT_HASH=$(git rev-parse --short HEAD)
+        
         # Replace placeholders in the task definition
         envsubst < aws/nestjs-task-template.json > aws/nestjs-task.json
 
