@@ -38,7 +38,7 @@ jobs:
       run: |
         # Build and tag the Docker image
         IMAGE_TAG=${{ steps.commit.outputs.commit_hash }}
-        ECR_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/bjj-tracker-server:$IMAGE_TAG
+        ECR_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/bjj-tracker-server
 
         echo "Docker Image: bjj-tracker-server:$IMAGE_TAG"
 
