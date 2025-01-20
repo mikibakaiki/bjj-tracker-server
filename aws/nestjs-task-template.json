@@ -1,0 +1,26 @@
+{
+    "family": "nestjs-task",
+    "networkMode": "awsvpc",
+    "containerDefinitions": [
+      {
+        "name": "bjj-tracker-server-container",
+        "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/bjj-tracker-server:${VERSION}",
+        "portMappings": [
+          {
+            "containerPort": 3000,
+            "protocol": "tcp"
+          }
+        ],
+        "essential": true,
+        "environment": [{
+            "name": "ATLAS_URI",
+            "value": "${ATLAS_URI}"
+          }]
+      }
+    ],
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "256",
+    "memory": "512",
+    "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole"
+  }
+  
