@@ -11,49 +11,59 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-      # Configure AWS Credentials
+    # Step 2: Extract Commit Hash
+    - name: Extract Commit Hash
+      id: commit
+      run: |
+        COMMIT_HASH=$(git rev-parse --short HEAD)
+        echo "Commit hash: $COMMIT_HASH"
+        echo "::set-output name=commit_hash::$COMMIT_HASH"
+
+    # Step 3: Configure AWS Credentials
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
-
+    
+    # Step 4: Log in to Amazon ECR
     - name: Log in to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
       with:
         region: ${{ secrets.AWS_REGION }}
 
+    # Step 5: Build and Push Docker Image to ECR
     - name: Build and push Docker image
       run: |
-        # Extract short commit hash for versioning
-        COMMIT_HASH=$(git rev-parse --short HEAD)
-
         # Build and tag the Docker image
-        docker build -t bjj-tracker-server:$COMMIT_HASH .
-        docker tag bjj-tracker-server:$COMMIT_HASH ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bjj-tracker-server:$COMMIT_HASH
+        IMAGE_TAG=${{ steps.commit.outputs.commit_hash }}
+        ECR_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/bjj-tracker-server:$IMAGE_TAG
 
-        # Push the image to ECR
-        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/bjj-tracker-server:$COMMIT_HASH
+        echo "Docker Image: bjj-tracker-server:$IMAGE_TAG"
+
+        docker build -t bjj-tracker-server:$IMAGE_TAG .
+        docker tag nestjs-server:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
+        docker push $ECR_URI:$IMAGE_TAG
       env:
         AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
 
-    - name: Render and register ECS task definition
-      run: |
-        # Extract short commit hash for versioning
-        COMMIT_HASH=$(git rev-parse --short HEAD)
-        
-        # Replace placeholders in the task definition
-        envsubst < aws/nestjs-task-template.json > aws/nestjs-task.json
-
-        # Register the task definition
-        aws ecs register-task-definition --cli-input-json file://aws/nestjs-task.json
+    # Step 6: Replace Placeholders in Task Definition
+    - name: Replace Placeholders in Task Definition
       env:
         ATLAS_URI: ${{ secrets.ATLAS_URI }}
         AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        VERSION: $COMMIT_HASH
+        VERSION: ${{ steps.commit.outputs.commit_hash }}
+      run: |
+        envsubst < aws/nestjs-task-template.json > aws/nestjs-task.json
+        echo "Version: $VERSION"
+
+    # Step 7: Register ECS Task Definition
+    - name: Register Task Definition
+      run: |
+        aws ecs register-task-definition --cli-input-json file://aws/nestjs-task.json
 
     - name: Update ECS Service
       run: |
