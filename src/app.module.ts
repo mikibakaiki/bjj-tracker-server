@@ -4,8 +4,6 @@ import { AppService } from './app.service';
 import { KimonoModule } from './kimono/kimono.module';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 
 @Module({
   imports: [
@@ -23,10 +21,6 @@ import { join } from 'path';
         uri: config.get<string>('ATLAS_URI'),
       }),
       inject: [ConfigService],
-    }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client'),
-      exclude: ['/api*'],
     }),
     ConfigModule.forRoot(),
     KimonoModule,

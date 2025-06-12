@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-
+import { DateTime } from 'luxon';
 import { Document } from 'mongoose';
 
 @Schema({ collection: 'kimono' })
@@ -19,7 +19,14 @@ export class Kimono extends Document {
   @Prop()
   url: string;
 
-  @Prop([Date])
+  @Prop({
+    type: [Date],
+    required: true,
+    get: (dates: Date[]) =>
+      dates.map((date) => DateTime.fromJSDate(date).toFormat('dd/MM/yyyy')),
+    set: (dates: string[]) =>
+      dates.map((date) => DateTime.fromFormat(date, 'dd/MM/yyyy').toJSDate()),
+  })
   timestamp: Date[];
 
   @Prop()
