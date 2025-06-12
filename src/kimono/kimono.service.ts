@@ -12,7 +12,6 @@ export class KimonoService {
   ) {}
 
   async findAll(paginationQuery: PaginationQueryDto) {
-    console.log(paginationQuery);
     const {
       search = '',
       timePeriod = 'all',
@@ -92,7 +91,6 @@ export class KimonoService {
 
     // Convert date to ISO format for MongoDB
     const isoDate = date.toJSDate();
-    console.log('Filtering date (ISO):', isoDate);
 
     return {
       timestamp: {
